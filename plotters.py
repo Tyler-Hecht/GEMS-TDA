@@ -67,43 +67,75 @@ def plot_each_diagram(dgms: list, h: int = None):
         plot_diagram(dgms, plot_only=[i], subplot = int("12" + str(i+1)), show = False)
     plt.show()
 
-def plot_all(data: list, dgms: list = None, show: bool = True, r: float = None, dgm: bool = True, dgm_line: bool = True):
+def plot(data: list, dgms: list = None, show: bool = True, r: float = None, plots: list[bool] = [True, True, True], dgm_line: bool = True, textbox: bool = True):
     # apply ripser as default unless specified
     if dgms == None:
         dgms = ripser(data)['dgms']
     if len(dgms) > 2:
-        print("Unable to plot data with more than 2 dimensions")
-        return
-    # determine how many plots there will be
-    if dgm:
-        num_plots = 3
-    else:
-        num_plots = 2
+        if plots[0]:
+            plots[0] = False
+            print("Unable to plot data with more than 2 dimensions")
 
+    # determine how many plots there will be
+    num_plots = 0
+    for plot in plots:
+        if plot:
+            num_plots+=1
     figure, axes = plt.subplots(1, num_plots)
-    initial_text = "enter radius"
+    # determine the index for each plot
+    if plots[0]:
+        data_index = 1
+        if plots[1]:
+            data_ax = axes[0]
+            bar_ax = axes[1]
+            bar_index = 2
+            if plots[2]:
+                dgm_index = 3
+                dgm_ax = axes[2]
+        elif plots[2]:
+            data_ax = axes[0]
+            dgm_ax = axes[1]
+            dgm_index = 2
+        else:
+            data_ax = axes
+    elif plots[1]:
+        bar_index = 1
+        if plots[2]:
+            bar_ax = axes[0]
+            dgm_ax = axes[1]
+            dgm_index = 2
+        else:
+            bar_ax= axes
+    elif plots[2]:
+        dgm_index = 1
+        dgm_ax = axes
+    else:
+        print("No plots to plot")
+        return
 
     # plot data and initialize circles
-    if r == None:
-        plot_data(data, 0, show = False, subplot = 100+10*num_plots+1, axes = axes[0])
-    else:
-        plot_data(data, r, show = False, subplot = 100+10*num_plots+1, axes = axes[0])
+    if plots[0]:
+        if r == None:
+            plot_data(data, 0, show = False, subplot = 100+10*num_plots+data_index, axes = data_ax)
+        else:
+            plot_data(data, r, show = False, subplot = 100+10*num_plots+data_index, axes = data_ax)
 
     # make barcode (and get the number of bars)
-    y = plot_barcode(dgms, show=False, r=r, subplot=100+10*num_plots+2, axes = axes[1])
+    if plots[1]:
+        y = plot_barcode(dgms, show=False, r=r, subplot=100+10*num_plots+bar_index, axes = bar_ax)
+        # add legend to barcode
+        hs = []
+        colors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple']
+        for i in range(0, len(dgms)):
+            hs.append(mpatches.Patch(color=colors[i], label="$H_{" +str(i)+"}$"))
+        bar_ax.legend(handles=hs, loc='lower right')
 
-    # add legend
-    hs = []
-    colors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple']
-    for i in range(0, len(dgms)):
-        hs.append(mpatches.Patch(color=colors[i], label="$H_{" +str(i)+"}$"))
-    axes[1].legend(handles=hs, loc='lower right')
     # plot diagram if applicable
-    if dgm:
+    if plots[2]:
         if dgm_line:
-            plot_diagram(dgms, subplot=100+10*num_plots+3, show = False, r = r)
+            plot_diagram(dgms, subplot=100+10*num_plots+dgm_index, show = False, r = r)
         else:
-            plot_diagram(dgms, subplot=100+10*num_plots+3, show = False)
+            plot_diagram(dgms, subplot=100+10*num_plots+dgm_index, show = False)
     # upon submitting the textbox
     def submit(text):
         if text == "-":
@@ -116,48 +148,71 @@ def plot_all(data: list, dgms: list = None, show: bool = True, r: float = None, 
         except:
             # if empty get ride of line and circles
             if text == "":
-                for patch in axes[0].patches:
-                    patch.radius = 0
+                if plots[0]:
+                    for patch in data_ax.patches:
+                        patch.radius = 0
                 # remove last barcode line added (the vertical one)
-                line = axes[1].get_lines()[-1]
-                if line._color == 'black':
-                    line.remove()
-                # same thing with two diagram lines
-                lines = axes[2].get_lines()[-2:]
-                for line in lines:
-                    if str(line._color) == 'gray':
+                if plots[1]:
+                    line = bar_ax.get_lines()[-1]
+                    if line._color == 'black':
                         line.remove()
+                # same thing with two diagram lines
+                if plots[2] and dgm_line:
+                    lines = dgm_ax.get_lines()[-2:]
+                    for line in lines:
+                        if str(line._color) == 'gray':
+                            line.remove()
                 return
             # if not empty, try to convert to float
             print("Input not a valid number")
             return
         # change circle radius
-        for patch in axes[0].patches:
-            patch.radius = r/2
+        if plots[0]:
+            for patch in data_ax.patches:
+                patch.radius = r/2
         # replace last barcode line added, effectively moving it to the new radius
-        line = axes[1].get_lines()[-1]
-        if line._color == 'black':
-            line.remove()
-        axes[1].plot([r, r], [0, y], color='black')
-        plt.draw()
+        if plots[1]:
+            line = bar_ax.get_lines()[-1]
+            if line._color == 'black':
+                line.remove()
+            bar_ax.plot([r, r], [0, y], color='black')
         # same thing with the two diagram lines
-        if dgm:
-            lines = axes[2].get_lines()[-2:]
+        if plots[2] and dgm_line:
+            lines = dgm_ax.get_lines()[-2:]
             for line in lines:
                 if str(line._color) == 'gray':
                     line.remove()
-            if dgm_line:
-                axes[2].plot([-100, r], [r, r], "--", color='gray')
-                axes[2].plot([r, r], [r, 10000*dgms[-1][-1][-1]], "--", color='gray')
+            dgm_ax.plot([-100, r], [r, r], "--", color='gray')
+            dgm_ax.plot([r, r], [r, 10000*dgms[-1][-1][-1]], "--", color='gray')
+        plt.draw()
     # start off the circles and vertical line if a radius is given
     if r != None:
         submit(r)
-    # add textbox (different location if diagram is plotted)
-    if dgm:
+    if not textbox:
+        plt.show()
+        return
+    # add textbox
+    # all three
+    if num_plots == 3:
         axbox = plt.axes([0.13, 0.15, 0.22, 0.05])
+    # only diagram
+    elif plots[2] and not (plots[0] or plots[1]):
+        axbox = plt.axes([0.265, 0.9, 0.5, 0.05])
+    # only barcode
+    elif plots[1] and not (plots[0] or plots[2]):
+        axbox = plt.axes([0.265, 0.9, 0.5, 0.05])
+    # only data
+    elif plots[0] and not (plots[1] or plots[2]):
+        axbox = plt.axes([0.26, 0.9, 0.5, 0.05])
+    # data and barcode
+    elif plots[0] and plots[1] and not plots[2]:
+        axbox = plt.axes([0.122, 0.03, 0.36, 0.05])
+    # barcode and diagram
+    elif plots[1] and plots[2] and not plots[0]:
+        axbox = plt.axes([0.54, 0.03, 0.36, 0.05])
+    # data and diagram
     else:
-        axbox = plt.axes([0.12, 0.15, 0.36, 0.05])
+        axbox = plt.axes([0.122, 0.03, 0.36, 0.05])
     text_box = TextBox(axbox, "Radius ")
     text_box.on_submit(submit)
-
     plt.show()
