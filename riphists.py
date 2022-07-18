@@ -234,10 +234,10 @@ def plot_anrs(info, special_TIs: list = [], save: bool = False):
     else:
         plt.show()
 
-TIs = list(range(336, 496, 8))
-data = get_means(TIs, 2000, 5000, special_TIs = [416, 832], remove_duplicates = True, save = True, bin_size=0.01)
+#TIs = list(range(336, 496, 8))
+#data = get_means(TIs, 2000, 5000, special_TIs = [416, 832], remove_duplicates = True, save = True, bin_size=0.01)
 
-plot_means(data, special_TIs = [416, 832], save = True)
+#plot_means(data, special_TIs = [416, 832], save = True)
 #plot_densities(data, special_TIs = [416, 832], save = True)
 #plot_anrs(data, special_TIs = [416, 832], save = True)
 
