@@ -16,10 +16,9 @@ import matplotlib.cbook as cbook
 import warnings
 warnings.filterwarnings("ignore")
 
-def run_metro(TI_np, n_iterations, r: float = 300, verbose: bool = False, flip: bool = False):
+def run_metro(TI_np, n_iterations, r: float = 300, verbose: bool = False, flip: bool = False, SNR: float = 10000):
+    n_iterations = int(n_iterations * 1.1) #burn in
     #Set the signal-to-noise ratio and standard deviation of the gaussian noise, which can be roughly estimated as 1/SNR
-    SNR = 1000
-    noise_sd = 1/SNR
     #Normalization Constant to get the T_ij and c_j around the same range
     #Based on the decay time of pure water
     t_norm = 3000
@@ -31,12 +30,14 @@ def run_metro(TI_np, n_iterations, r: float = 300, verbose: bool = False, flip: 
     TE_max = 512
     TE_set = np.linspace(TE_max/n_TE, TE_max, n_TE)
     #Define true values of the 6 parameters
+    #For future usage, these parameters may want be made into function parameters
     c1 = 0.5
     c2 = 0.5
     T11 = 600
     T12 = 1200
     T21 = 45
     T22 = 100
+    noise_sd = (c1+c2)/SNR
 
     def S_4_param(TE, d1, d2, T21, T22):
         #Gives a 4 parameter, 1D model. Comes in when plugging in a constant value for TI
@@ -180,4 +181,4 @@ def run_metro(TI_np, n_iterations, r: float = 300, verbose: bool = False, flip: 
 
     #np.save("metrodata.npy", estimates_4P)
     #print("Data generated")
-    return estimates_4P
+    return estimates_4P[int(0.1*n_iterations):]

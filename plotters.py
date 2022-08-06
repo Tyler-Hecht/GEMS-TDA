@@ -6,7 +6,11 @@ from ripser import ripser
 import numpy as np
 import warnings
 
-def plot_data(data: list, r: float, show: bool = True, subplot: int = 111, axes: list = None):
+# some functions to plot the data, persistence barcode, and persistence diagrams
+# you should probably use plot, as it can do all or some of these things at once
+# plot_each_diagram is only useful when going beyond H_0
+
+def plot_data(data: list, r: float, show: bool = True, subplot: int = 111, axes: list = None, s: int = 5, xlim: list = None, ylim: list = None):
     if len(list(data)[0]) > 2:
         print("Unable to plot data with more than 2 dimensions")
         return
@@ -14,8 +18,12 @@ def plot_data(data: list, r: float, show: bool = True, subplot: int = 111, axes:
         figure, axes = plt.subplots()
     plt.subplot(subplot)
     for pair in data:
-        plt.scatter(pair[0], pair[1], color = "black", s = 5)
+        plt.scatter(pair[0], pair[1], color = "black", s = s)
         axes.add_patch(plt.Circle((pair[0], pair[1]), r/2, alpha = 0.2))
+    if not xlim == None:
+        axes.set_xlim(xlim)
+    if not ylim == None:
+        axes.set_ylim(ylim)
     axes.set_aspect(1)
     if show: 
         plt.show()
@@ -58,6 +66,8 @@ def plot_diagram(dgms: list, show: bool = True, r: float = None, subplot: int = 
         plt.show()
 
 def plot_each_diagram(dgms: list, h: int = None):
+    # plots each homology group separately on a persistent diagram
+    # h is the number of homology groups to plot
     if h == None:
         h = len(dgms)
     elif h > len(dgms):
@@ -68,6 +78,19 @@ def plot_each_diagram(dgms: list, h: int = None):
     plt.show()
 
 def plot(data: list, dgms: list = [], show: bool = True, r: float = None, plots: list[bool] = [True, True, True], dgm_line: bool = True, textbox: bool = True):
+    """
+    Plots the data, barcode, and persistence diagrams
+    data: the point clouds
+    dgms: ripser's dgms output
+    r: the radius of the circles when first plotting the data
+    plots: list of three booleans, whether to plot the data,
+           barcode, and persistence diagrams, respectively
+    dgm_line: boolean, whether to plot a line on the persistence diagram
+    textbox: boolean, whether to plot a textbox on the persistence diagram
+             if true, the textbox will be interactive and allow you to
+             change the value of the r parameter
+    """
+    
     # apply ripser as default unless specified
     if dgms == None:
         dgms = ripser(data)['dgms']
