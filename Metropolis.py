@@ -30,7 +30,7 @@ def run_metro(TI_np, n_iterations, r: float = 300, verbose: bool = False, flip: 
     TE_max = 512
     TE_set = np.linspace(TE_max/n_TE, TE_max, n_TE)
     #Define true values of the 6 parameters
-    #For future usage, these parameters may want be made into function parameters
+    #For future usage, these parameters may be made into function parameters
     c1 = 0.5
     c2 = 0.5
     T11 = 600
