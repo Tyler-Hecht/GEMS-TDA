@@ -138,6 +138,18 @@ class Data:
         self.acr_std = acr[1]
 
     def plot_acr(self, polyfit: int = None, save: bool = False, filename: str = None):
+        '''
+        Plots the average critical radius across all TIs
+        See fit_poly for details about fitting
+
+        Parameters:
+            polyfit: If specified, will fit a polynomial of degree polyfit
+                     to the data and plot the fit
+            save: If True, will save the plot to a file
+                  Otherwise, will display the plot
+            filename: If save is True, will save the plot to this file
+        '''
+        
         title = f"Iterations: {self.n_iters}, Sample size: {self.sample_size}, Bin size: {self.bin_size}, Threshold: {self.thresh}"
         plt.xlabel("TI")
         plt.ylabel("Average critical radius")
@@ -174,6 +186,19 @@ class Data:
             plt.show()
 
     def fit_poly(self, degrees: int, null: float = None):
+        '''
+        Fits a polynomial to the data and sets the minimum point to self.minSNR
+
+        Parameters:
+            degrees: How many degrees of the polynomial to fit
+                     (2 for quadratic, 4 for quartic, etc.)
+            null: The null point in the TI range
+                  If specified self.dTI will be set to the difference
+                  between the null point and the minimum SNR
+        
+        Returns:
+            The polynomial function
+        '''
         fit = np.polyfit(self.TIs, self.acr_mean, degrees)
         def f(x):
             sum = 0
@@ -187,10 +212,17 @@ class Data:
             self.dTI[null] = null - self.minSNR
         return f
 
-    def generate_all(self, bin_size: float = 0.01, thresh: int = 1, save: bool = False):
-        # runs everything sequentially
-        # data are saved after each step instead of at the end
-        # in case there's a memory issue
+    def generate_all(self, bin_size: float = 0.01, thresh: int = 1, save: bool = True):
+        '''
+        Runs everything sequentially
+        If save is true, data are saved after each step instead of at the end
+        in case there's a memory issue
+
+        Parameters:
+            bin_size: The bin size used for binning
+            thresh: The threshold used after binning
+            save: Whether or not to save the data to a file
+        '''
         self.bin_size = bin_size
         self.thresh = thresh
         self.generate_data()
@@ -214,24 +246,26 @@ TIs = list(range(366, 466, 2))
 n_iters = 1000
 sample_size = 200
 os.chdir("Data/1000(366-466)")
-SNRs = list(range(1000, 15500, 500))
+SNRs = list(range(1000, 40250, 250))
 dTIs = []
 for SNR in SNRs:
     data = Data(TIs, n_iters, sample_size, SNR)
     try:
         data.load_acr()
     except:
+        print(SNR)
         data.generate_all()
         data.load_acr()
-    data.fit_poly(4, 416)
+    data.fit_poly(2, 416)
+    data.plot_acr(2, True)
     dTIs.append(data.dTI[416])
-log = True
+log = False
 if log:
-    plt.plot(np.log(SNRs), np.log(dTIs), '-o')
+    plt.scatter(np.log(SNRs), np.log(dTIs), 10)
     plt.xlabel("log(SNR)")
     plt.ylabel("log($\Delta$TI)")
 else:
-    plt.plot(SNRs, dTIs, '-o')
+    plt.scatter(SNRs, dTIs, 10)
     plt.xlabel("SNR")
     plt.ylabel("$\Delta$TI")
 plt.title("Iterations = 1000, Sample Size = 200, Bin Size = 0.01, Threshold = 1")

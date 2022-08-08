@@ -81,15 +81,17 @@ def plot_each_diagram(dgms: list, h: int = None):
 def plot(data: list, dgms: list = [], show: bool = True, r: float = None, plots: list[bool] = [True, True, True], dgm_line: bool = True, textbox: bool = True):
     """
     Plots the data, barcode, and persistence diagrams
-    data: the point clouds
-    dgms: ripser's dgms output
-    r: the radius of the circles when first plotting the data
-    plots: list of three booleans, whether to plot the data,
-           barcode, and persistence diagrams, respectively
-    dgm_line: boolean, whether to plot a line on the persistence diagram
-    textbox: boolean, whether to plot a textbox on the persistence diagram
-             if true, the textbox will be interactive and allow you to
-             change the value of the r parameter
+    
+    Parameters:
+        data: the point clouds
+        dgms: ripser's dgms output
+        r: the radius of the circles when first plotting the data
+        plots: list of three booleans, whether to plot the data,
+            barcode, and persistence diagrams, respectively
+        dgm_line: boolean, whether to plot a line on the persistence diagram
+        textbox: boolean, whether to plot a textbox on the persistence diagram
+                if true, the textbox will be interactive and allow you to
+                change the value of the r parameter
     """
     
     # apply ripser as default unless specified
