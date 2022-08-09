@@ -25,8 +25,10 @@ def run_metro(TI_np, n_iterations, r: float = 300, verbose: bool = False, flip: 
         TI_np: TI value to use
         n_iterations: number of steps/iterations (m) to run
         r: The box (from 0 to r) in which the algorithm will run
+            No need to change this unless necessary
         verbose: If true, will display out the progress of the algorithm
         flip: If true, will flip T21 and T22 as well as d1 and d2 in the initial starting point
+              See run_metro_2 in Helpers for its usage
         SNR: The signal to noise ratio of the data
              The signal is c1 + c2
              The noise is the standard deviation of the Gaussian noise
@@ -36,7 +38,6 @@ def run_metro(TI_np, n_iterations, r: float = 300, verbose: bool = False, flip: 
         Roughly forms a PDF of the distribution
     '''
     
-    # r determines the box Metropolis is run in, no need to change this unless necessary
     n_iterations = int(n_iterations * 1.1) #burn in
     #Set the signal-to-noise ratio and standard deviation of the gaussian noise, which can be roughly estimated as 1/SNR
     #Normalization Constant to get the T_ij and c_j around the same range

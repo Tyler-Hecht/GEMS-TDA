@@ -8,6 +8,7 @@ def normalize(data):
     return (data - min)/(max - min)
 
 def run_metro_2(TI, n_iters, SNR: float = 10000, verbose: bool = True):
+    # USE THIS IF YOU WANT TWO CONNECTED COMPONENTS
     # runs metropolis for a given TI and SNR with half the iterations
     # at the initial point and the other half at the initial point with
     # T21 and T22 flipped as well as d1 and d2 flipped

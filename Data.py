@@ -14,12 +14,13 @@ class Data:
         
         # Initializes the data object for a given SNR, TI range, number of iterations, sample size, and null points
         self.TIs = TIs
-        self.TItitle = f"{min(TIs)}-{max(TIs)},{TIs[1]-TIs[0]}"
+        self.TItitle = f"{min(TIs)}-{max(TIs)},{round(TIs[1]-TIs[0], 5)}"
         self.n_iters = n_iters
         self.sample_size = sample_size
         self.SNR = SNR
         self.nullpts = nullpts
-        # these start out as empty
+        # these rest start out as empty
+        # the lists can be loaded in
         self.data = []
         self.binned = []
         self.threshed = []
@@ -28,6 +29,7 @@ class Data:
         self.acr_std = []
         self.fit = None
         self.minSNR = None
+        # maps null points to dTIs
         self.dTI = {}
 
     def generate_data(self):
@@ -150,7 +152,7 @@ class Data:
             filename: If save is True, will save the plot to this file
         '''
         
-        title = f"Iterations: {self.n_iters}, Sample size: {self.sample_size}, Bin size: {self.bin_size}, Threshold: {self.thresh}"
+        title = f"Iterations: {self.n_iters}, Sample size: {self.sample_size}, Bin size: {self.bin_size}, Threshold: {self.thresh}\nSNR: {self.SNR}, "
         plt.xlabel("TI")
         plt.ylabel("Average critical radius")
         plt.errorbar(self.TIs, self.acr_mean, yerr = self.acr_std, fmt = 'o', zorder = 1)
@@ -172,7 +174,7 @@ class Data:
             plt.xlim(xlim)
             plt.ylim(ylim)
             plt.plot(min, f(min), 'ro', zorder = 3)
-            title += f"\nSNR: {self.SNR}, Minimum: {min:.2f}, $\Delta$TI = {416 - min:.2f}"
+            title += f"Fit degrees: {polyfit}, Minimum: {min:.2f}, $\delta$ = {416 - min:.2f}"
         plt.title(title)
         if save:
             if filename == None:
@@ -193,8 +195,9 @@ class Data:
             degrees: How many degrees of the polynomial to fit
                      (2 for quadratic, 4 for quartic, etc.)
             null: The null point in the TI range
-                  If specified self.dTI will be set to the difference
-                  between the null point and the minimum SNR
+                  If specified self.dTI's value for that null poin
+                  will be set to the difference between the null
+                  point and the minimum SNR
         
         Returns:
             The polynomial function
@@ -242,12 +245,13 @@ class Data:
             self.save_acr()
 
 # example usage
-TIs = list(range(366, 466, 2))
+TIs = list(np.arange(405*10, 425.1*10, 1)/10)
 n_iters = 1000
 sample_size = 200
-os.chdir("Data/1000(366-466)")
-SNRs = list(range(1000, 40250, 250))
+os.chdir("Data/1000(405-425)")
+SNRs = list(range(1000, 10500, 500))
 dTIs = []
+fit_degrees = 4
 for SNR in SNRs:
     data = Data(TIs, n_iters, sample_size, SNR)
     try:
@@ -256,8 +260,8 @@ for SNR in SNRs:
         print(SNR)
         data.generate_all()
         data.load_acr()
-    data.fit_poly(2, 416)
-    data.plot_acr(2, True)
+    data.fit_poly(fit_degrees, 416)
+    #data.plot_acr(fit_degrees, True)
     dTIs.append(data.dTI[416])
 log = False
 if log:
@@ -268,5 +272,5 @@ else:
     plt.scatter(SNRs, dTIs, 10)
     plt.xlabel("SNR")
     plt.ylabel("$\Delta$TI")
-plt.title("Iterations = 1000, Sample Size = 200, Bin Size = 0.01, Threshold = 1")
+plt.title(f"Iterations = {n_iters}, Sample Size = {sample_size}, Bin Size = 0.01, Threshold = 1\nFit Degrees = {fit_degrees}")
 plt.show()
