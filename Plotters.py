@@ -78,13 +78,14 @@ def plot_each_diagram(dgms: list, h: int = None):
         plot_diagram(dgms, plot_only=[i], subplot = int("12" + str(i+1)), show = False)
     plt.show()
 
-def plot(data: list, dgms: list = [], show: bool = True, r: float = None, plots: list[bool] = [True, True, True], dgm_line: bool = True, textbox: bool = True):
+def plot(data: list, dgms: list = None, r: float = None, plots: list[bool] = [True, True, True], dgm_line: bool = True, textbox: bool = True):
     """
     Plots the data, barcode, and persistence diagrams
+    Allows for interactive changing of the radius
     
     Parameters:
         data: the point clouds
-        dgms: ripser's dgms output
+        dgms: ripser's dgms output (will be generated with default parameters if not provided)
         r: the radius of the circles when first plotting the data
         plots: list of three booleans, whether to plot the data,
             barcode, and persistence diagrams, respectively

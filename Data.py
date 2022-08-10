@@ -103,6 +103,8 @@ class Data:
             self.ripped.append([])
             for j in trange(len(self.threshed[i]), position = 0, leave = False):
                 # applies ripser to the threshed data and gets the critical radius
+                # ["dgms"][0][-2][1] gets the persistence data from Ripser, selects H_0,
+                # the penultimate bar, and the endpoint
                 self.ripped[i].append(ripser(np.array(self.threshed[i][j]), maxdim = 0)["dgms"][0][-2][1])
 
     def save_ripped(self, filename: str = None):
