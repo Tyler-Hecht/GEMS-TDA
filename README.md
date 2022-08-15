@@ -10,5 +10,7 @@ The GEMS_Report pdf provides a detailed explanation of this research.
 
 Links to generated data:\
 https://drive.google.com/file/d/14MWHccJcZnmggsU-XGT-MW5FN_qWHRn7/view?usp=sharing
+https://drive.google.com/file/d/1gG6k5D9hDiJXlIIBrVXrIBBjcUfBRlcS/view?usp=sharing
 
 Presentations:\
+https://drive.google.com/file/d/1e1KsUQfZ6BPb5kA6DFgE7-dxP3hcM6jN/view?usp=sharing
