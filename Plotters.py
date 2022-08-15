@@ -244,7 +244,6 @@ def plot(data: list, dgms: list = None, r: float = None, plots: list[bool] = [Tr
     text_box.on_submit(submit)
     plt.show()
 
-
 # example usage
 # plot() works best in full screen
 data = datasets.make_circles(n_samples=100)[0] + 5 * datasets.make_circles(n_samples=100)[0]

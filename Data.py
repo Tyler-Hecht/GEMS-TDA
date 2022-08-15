@@ -1,3 +1,4 @@
+from operator import truediv
 import numpy as np
 import matplotlib.pyplot as plt
 from ripser import ripser
@@ -11,7 +12,9 @@ class Data:
         # Data class includes methods for generating, saving, loading, and everything else
         # necessary to calculate the average critical radius
         # These methods can be run sequentially to using generate_all
-        
+        # ** The TIs parameter assumes that the TIs have constant deltaTI
+        # for naming purposes but variable deltaTI is allowed **
+
         # Initializes the data object for a given SNR, TI range, number of iterations, sample size, and null points
         self.TIs = TIs
         self.TItitle = f"{min(TIs)}-{max(TIs)},{round(TIs[1]-TIs[0], 5)}"
@@ -21,6 +24,7 @@ class Data:
         self.nullpts = nullpts
         # these rest start out as empty
         # the lists can be loaded in
+        # the lists are parallel to the TIs list
         self.data = []
         self.binned = []
         self.threshed = []
@@ -141,12 +145,13 @@ class Data:
         self.acr_mean = acr[0]
         self.acr_std = acr[1]
 
-    def plot_acr(self, polyfit: int = None, save: bool = False, filename: str = None):
+    def plot_acr(self, error_bars: bool = True, polyfit: int = None, save: bool = False, filename: str = None):
         '''
         Plots the average critical radius across all TIs
         See fit_poly for details about fitting
 
         Parameters:
+            error_bars: whether to plot error bars
             polyfit: If specified, will fit a polynomial of degree polyfit
                      to the data and plot the fit
             save: If True, will save the plot to a file
@@ -157,7 +162,10 @@ class Data:
         title = f"Iterations: {self.n_iters}, Sample size: {self.sample_size}, Bin size: {self.bin_size}, Threshold: {self.thresh}\nSNR: {self.SNR}, "
         plt.xlabel("TI")
         plt.ylabel("Average critical radius")
-        plt.errorbar(self.TIs, self.acr_mean, yerr = self.acr_std, fmt = 'o', zorder = 1)
+        if error_bars:
+            plt.errorbar(self.TIs, self.acr_mean, yerr = self.acr_std, fmt = 'o', zorder = 1)
+        else: 
+            plt.plot(self.TIs, self.acr_mean, 'o', zorder = 1)
         null = None
         for i in self.nullpts:
             if i in self.TIs:
@@ -247,11 +255,14 @@ class Data:
             self.save_acr()
 
 # example usage
-TIs = list(np.arange(405*10, 425.1*10, 1)/10)
+TIs = list(range(366, 466, 2))
+#TIs = list(np.arange(405*10, 425.1*10, 1)/10)
 n_iters = 1000
 sample_size = 200
-os.chdir("Data/1000(405-425)")
-SNRs = list(range(1000, 10500, 500))
+os.chdir("Data/1000(366-466)")
+#os.chdir("Data/1000(405-425)")
+SNRs = list(range(1000, 50250, 250))
+#SNRs = list(range(4000, 20000, 500)) + list([22500, 27500, 32500, 37500, 42500, 47500]) + list([20000, 25000, 30000, 35000, 40000, 45000, 50000])
 dTIs = []
 fit_degrees = 4
 for SNR in SNRs:
@@ -263,16 +274,16 @@ for SNR in SNRs:
         data.generate_all()
         data.load_acr()
     data.fit_poly(fit_degrees, 416)
-    #data.plot_acr(fit_degrees, True)
+    #data.plot_acr(False, fit_degrees, True)
     dTIs.append(data.dTI[416])
 log = False
 if log:
     plt.scatter(np.log(SNRs), np.log(dTIs), 10)
     plt.xlabel("log(SNR)")
-    plt.ylabel("log($\Delta$TI)")
+    plt.ylabel("log($\delta$)")
 else:
     plt.scatter(SNRs, dTIs, 10)
     plt.xlabel("SNR")
-    plt.ylabel("$\Delta$TI")
+    plt.ylabel("$\delta$")
 plt.title(f"Iterations = {n_iters}, Sample Size = {sample_size}, Bin Size = 0.01, Threshold = 1\nFit Degrees = {fit_degrees}")
 plt.show()
